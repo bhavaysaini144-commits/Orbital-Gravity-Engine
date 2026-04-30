@@ -2,143 +2,161 @@ from flask import Flask, render_template_string
 
 app = Flask(__name__)
 
-# --- TITAN ENGINE: v6 (OPTIMIZED & PROFESSIONAL) ---
+# --- TITAN ARCHITECT: v7 (FEATURE COMPLETE) ---
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Titan | Orbital Dynamics Lab</title>
+    <title>Titan | Architect Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* --- PROFESSIONAL UI THEME --- */
-        :root { --bg: #0b0c10; --panel: rgba(20, 24, 30, 0.85); --accent: #00f2ff; --text: #c5c6c7; --alert: #ff2e63; }
+        :root { --bg: #050508; --panel: rgba(15, 18, 24, 0.9); --accent: #00f2ff; --text: #c5c6c7; --alert: #ff2e63; --gold: #ffd700; }
         body { margin: 0; background: var(--bg); overflow: hidden; font-family: 'Inter', sans-serif; color: var(--text); user-select: none; }
         canvas { display: block; width: 100vw; height: 100vh; }
 
         /* DASHBOARD LAYOUT */
-        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: grid; grid-template-columns: 320px 1fr 320px; padding: 20px; box-sizing: border-box; }
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: grid; grid-template-columns: 300px 1fr 300px; padding: 20px; box-sizing: border-box; }
         
         /* PANELS */
         .panel { 
             background: var(--panel); 
-            backdrop-filter: blur(12px); 
-            border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 6px; 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255,255,255,0.15); 
+            border-radius: 8px; 
             padding: 20px; 
             pointer-events: auto; 
-            display: flex; flex-direction: column; gap: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
         }
 
-        /* TYPOGRAPHY */
-        h2 { margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        .stat-row { display: flex; justify-content: space-between; font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+        h2 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; font-weight: 800; }
+        .stat-row { display: flex; justify-content: space-between; font-size: 12px; font-family: 'JetBrains Mono', monospace; align-items: center; }
         .stat-val { color: #fff; font-weight: 700; }
         
         /* CONTROLS */
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         button {
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff;
-            padding: 10px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; transition: 0.2s;
+            padding: 8px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; transition: 0.2s; text-transform: uppercase;
         }
         button:hover { background: var(--accent); color: #000; border-color: var(--accent); }
         button.danger { border-color: var(--alert); color: var(--alert); }
         button.danger:hover { background: var(--alert); color: white; }
 
-        /* ORBIT STATUS INDICATOR */
-        #orbit-status { 
-            text-align: center; padding: 8px; border-radius: 4px; font-weight: 800; font-size: 12px; letter-spacing: 1px; 
-            background: #1a1d24; color: #555; 
-        }
-        .status-stable { background: rgba(0, 242, 255, 0.15) !important; color: var(--accent) !important; box-shadow: 0 0 15px var(--accent); }
-        .status-escape { background: rgba(255, 46, 99, 0.15) !important; color: var(--alert) !important; }
+        /* INPUTS */
+        select { width: 100%; background: #111; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; cursor: pointer; }
+        input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; }
 
-        /* TOOLTIP INSTRUCTIONS */
-        .controls-hint { position: absolute; bottom: 30px; width: 100%; text-align: center; font-size: 12px; opacity: 0.5; letter-spacing: 1px; }
+        /* ALERTS */
+        #orbit-status { 
+            text-align: center; padding: 10px; border-radius: 4px; font-weight: 800; font-size: 11px; letter-spacing: 1px; 
+            background: #1a1d24; color: #555; margin-top: 10px;
+        }
+        .status-stable { background: rgba(0, 242, 255, 0.1) !important; color: var(--accent) !important; border: 1px solid var(--accent); }
+        .status-escape { background: rgba(255, 46, 99, 0.1) !important; color: var(--alert) !important; border: 1px solid var(--alert); }
+
+        .controls-hint { position: absolute; bottom: 30px; width: 100%; text-align: center; font-size: 11px; opacity: 0.4; letter-spacing: 2px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
 <div class="ui-layer">
-    <!-- LEFT: MISSION CONTROL -->
+    <!-- LEFT: CELESTIAL FORGE -->
     <div class="panel">
-        <h2>Mission Configuration</h2>
+        <h2>Celestial Forge</h2>
+        
+        <div class="stat-row"><span>Entity Type</span></div>
+        <select id="type-select" onchange="updateBuilder()">
+            <option value="planet">Standard Planet</option>
+            <option value="star_yellow">Yellow Star (Sun)</option>
+            <option value="star_neutron">Neutron Star (Dense)</option>
+            <option value="black_hole">>> BLACK HOLE <<</option>
+        </select>
+
+        <div class="stat-row"><span>Mass Index</span> <span id="mass-display" class="stat-val">20</span></div>
+        <input type="range" id="mass-slider" min="5" max="1000" value="20" oninput="updateBuilder()">
+
+        <div class="stat-row"><span>Parameters</span></div>
+        <div class="btn-group">
+            <button id="lock-btn" onclick="toggleLock()">Mode: Orbit</button>
+        </div>
+        <div style="font-size: 10px; color: #666; margin-top: 5px;">*Locked objects do not move (Fixed Stars)</div>
+    </div>
+
+    <!-- CENTER -->
+    <div></div>
+
+    <!-- RIGHT: MISSION CONTROL -->
+    <div class="panel">
+        <h2>Mission Control</h2>
         <div class="btn-group">
             <button onclick="sim.loadSolar()">Load Solar</button>
             <button onclick="sim.loadBinary()">Load Binary</button>
         </div>
-        <button class="danger" onclick="sim.reset()">Clear Vacuum</button>
-        
+        <button class="danger" onclick="sim.reset()">Clear Sector</button>
+
         <div style="height: 10px;"></div>
-        <h2>Physics Parameters</h2>
-        <div class="stat-row"><span>Time Scale</span> <span id="t-val" class="stat-val">1.0x</span></div>
-        <input type="range" min="0" max="3" step="0.1" value="1" oninput="sim.params.timeScale=parseFloat(this.value); updateUI();">
-    </div>
-
-    <!-- CENTER spacer -->
-    <div></div>
-
-    <!-- RIGHT: TELEMETRY -->
-    <div class="panel">
-        <h2>Flight Computer</h2>
-        <div class="stat-row"><span>Active Bodies:</span> <span id="count" class="stat-val">0</span></div>
-        <div class="stat-row"><span>Zoom Level:</span> <span id="zoom-display" class="stat-val">1.00x</span></div>
-        
-        <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 5px 0;"></div>
-        
-        <!-- DYNAMIC TRAJECTORY DATA -->
+        <h2>Telemetry</h2>
+        <div class="stat-row"><span>Objects:</span> <span id="count" class="stat-val">0</span></div>
         <div class="stat-row"><span>Launch Vel:</span> <span id="v-launch" class="stat-val">--</span></div>
         <div class="stat-row"><span>Escape Vel:</span> <span id="v-esc" class="stat-val">--</span></div>
-        <div id="orbit-status">AWAITING INPUT</div>
+        
+        <div id="orbit-status">SYSTEM IDLE</div>
     </div>
 </div>
 
-<div class="controls-hint">LEFT DRAG: LAUNCH • RIGHT DRAG: PAN CAMERA • SCROLL: ZOOM</div>
+<div class="controls-hint">Left Drag: Launch • Right Drag: Pan • Scroll: Zoom</div>
 <canvas id="canvas"></canvas>
 
 <script>
 /**
- * TITAN ENGINE v6
- * A High-Performance N-Body Physics Kernel
+ * TITAN ENGINE v7
+ * Optimized N-Body Core with Celestial Forge
  */
 
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d', { alpha: false }); // Optimize rendering
+const ctx = canvas.getContext('2d', { alpha: false });
 
 // --- ENGINE STATE ---
 const sim = {
     width: 0, height: 0,
     bodies: [],
-    camera: { x: 0, y: 0, zoom: 0.5 }, // Start zoomed out
+    camera: { x: 0, y: 0, zoom: 0.5 }, 
     input: { 
-        dragStart: null, // World coords
-        current: null,   // World coords
-        panning: false, 
-        panStart: {x:0, y:0} 
+        dragStart: null, current: null, 
+        panning: false, panStart: {x:0, y:0} 
     },
-    params: { G: 1.5, timeScale: 1.0 }, // Tuned Gravity
-    cache: { trajectory: [] } // Optimization: Cache prediction
+    params: { G: 1.5, timeScale: 1.0 },
+    cache: { trajectory: [] },
+    // New Builder State
+    builder: { type: 'planet', mass: 20, color: '#00f2ff', locked: false }
 };
 
-// --- THE PHYSICS KERNEL ---
+// --- PHYSICS KERNEL ---
 class Body {
-    constructor(x, y, mass, vx, vy, color, type) {
+    constructor(x, y, mass, vx, vy, color, type, locked) {
         this.x = x; this.y = y;
         this.mass = mass;
         this.vx = vx; this.vy = vy;
         this.color = color;
-        this.type = type; // 'star' | 'planet'
-        this.radius = type === 'star' ? Math.sqrt(mass)*0.4 : Math.max(2, Math.sqrt(mass));
+        this.type = type; 
+        this.locked = locked;
         this.trail = [];
+        
+        // Density Physics: R = sqrt(M) * DensityFactor
+        if (type === 'black_hole') this.radius = Math.sqrt(mass) * 0.2; // Super dense
+        else if (type.includes('star')) this.radius = Math.sqrt(mass) * 0.6;
+        else this.radius = Math.sqrt(mass);
     }
 
     update(dt) {
-        if (this.type === 'star') return; // Optimization: Stars don't move in this mode
+        if (this.locked) return; 
 
         let fx = 0, fy = 0;
         
-        // Semi-Implicit Euler Integration (Symplectic)
+        // Symplectic Integration
         for (let other of sim.bodies) {
             if (other === this) continue;
             
@@ -147,13 +165,14 @@ class Body {
             let distSq = dx*dx + dy*dy;
             let dist = Math.sqrt(distSq);
 
-            // Collision (Absorption Logic)
+            // Collision / Event Horizon
             if (dist < this.radius + other.radius) {
-                if (other.mass > this.mass) { this.dead = true; other.mass += this.mass * 0.1; }
+                // Absorption Logic: Bigger eats smaller
+                if (other.mass >= this.mass) { this.dead = true; other.mass += this.mass * 0.5; }
                 continue;
             }
 
-            // Gravity: F = G * M * m / r^2
+            // Gravity
             let f = (sim.params.G * other.mass) / distSq;
             fx += f * (dx / dist);
             fy += f * (dy / dist);
@@ -164,8 +183,8 @@ class Body {
         this.x += this.vx * dt;
         this.y += this.vy * dt;
 
-        // Trail Buffer (Optimized: Skip frames if slow)
-        if (sim.bodies.length < 300) {
+        // Optimized Trail: Only update every 2nd frame
+        if (sim.bodies.length < 300 && Math.random() > 0.5) {
             this.trail.push({x: this.x, y: this.y});
             if (this.trail.length > 100) this.trail.shift();
         }
@@ -175,16 +194,14 @@ class Body {
         let sx = w2s_x(this.x);
         let sy = w2s_y(this.y);
         let sr = this.radius * sim.camera.zoom;
+        if (sr < 0.5) return; 
 
-        if (sr < 0.5) return; // Don't draw sub-pixel dots
-
-        // Draw Trail
+        // Trail
         if (this.trail.length > 2) {
             ctx.beginPath();
             ctx.strokeStyle = this.color;
             ctx.lineWidth = 1;
-            ctx.globalAlpha = 0.3;
-            // Draw only every 3rd point for performance
+            ctx.globalAlpha = 0.4;
             ctx.moveTo(w2s_x(this.trail[0].x), w2s_y(this.trail[0].y));
             for(let i=2; i<this.trail.length; i+=2) {
                 ctx.lineTo(w2s_x(this.trail[i].x), w2s_y(this.trail[i].y));
@@ -193,136 +210,146 @@ class Body {
             ctx.globalAlpha = 1.0;
         }
 
-        // Draw Body
+        // Body Render
         ctx.beginPath();
         ctx.arc(sx, sy, sr, 0, Math.PI*2);
         ctx.fillStyle = this.color;
         
-        // Star Glow
-        if (this.type === 'star') {
-            ctx.shadowBlur = 40;
-            ctx.shadowColor = this.color;
+        // Special Effects
+        if (this.type === 'star_yellow') {
+            ctx.shadowBlur = 30; ctx.shadowColor = this.color;
+        } else if (this.type === 'black_hole') {
+            ctx.fillStyle = '#000';
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.shadowBlur = 20; ctx.shadowColor = '#ff0000'; // Accretion Disk
         }
         ctx.fill();
         ctx.shadowBlur = 0;
     }
 }
 
-// --- COORDINATE SYSTEMS (CRITICAL FOR ZOOM) ---
-// World to Screen
+// --- TRANSFORM MATH ---
 function w2s_x(wx) { return (wx - sim.camera.x) * sim.camera.zoom + sim.width/2; }
 function w2s_y(wy) { return (wy - sim.camera.y) * sim.camera.zoom + sim.height/2; }
-// Screen to World
 function s2w_x(sx) { return (sx - sim.width/2) / sim.camera.zoom + sim.camera.x; }
 function s2w_y(sy) { return (sy - sim.height/2) / sim.camera.zoom + sim.camera.y; }
 
-// --- INPUT HANDLING (PAN & ZOOM) ---
-window.addEventListener('resize', () => {
-    sim.width = canvas.width = window.innerWidth;
-    sim.height = canvas.height = window.innerHeight;
-});
+// --- UI LOGIC ---
+function updateBuilder() {
+    const type = document.getElementById('type-select').value;
+    const mass = parseInt(document.getElementById('mass-slider').value);
+    document.getElementById('mass-display').innerText = mass;
+
+    sim.builder.type = type;
+    sim.builder.mass = mass;
+    
+    // Preset Colors & Locks
+    if (type === 'planet') { sim.builder.color = '#00f2ff'; sim.builder.locked = false; }
+    if (type === 'star_yellow') { sim.builder.color = '#ffaa00'; sim.builder.locked = true; }
+    if (type === 'star_neutron') { sim.builder.color = '#0088ff'; sim.builder.locked = true; }
+    if (type === 'black_hole') { sim.builder.color = '#000'; sim.builder.locked = true; }
+    
+    // Update Button Text
+    updateLockBtn();
+}
+
+function toggleLock() {
+    sim.builder.locked = !sim.builder.locked;
+    updateLockBtn();
+}
+
+function updateLockBtn() {
+    const btn = document.getElementById('lock-btn');
+    btn.innerText = sim.builder.locked ? "MODE: FIXED (STAR)" : "MODE: ORBIT (PLANET)";
+    btn.style.borderColor = sim.builder.locked ? "#ffaa00" : "#00f2ff";
+    btn.style.color = sim.builder.locked ? "#ffaa00" : "#00f2ff";
+}
+
+// --- INPUT & TRAJECTORY ---
+window.addEventListener('resize', () => { sim.width = canvas.width = window.innerWidth; sim.height = canvas.height = window.innerHeight; });
+canvas.addEventListener('contextmenu', e => e.preventDefault());
 
 canvas.addEventListener('wheel', e => {
-    e.preventDefault(); // STOP PAGE SCROLLING
-    let zoomIntensity = 0.1;
-    sim.camera.zoom += e.deltaY < 0 ? zoomIntensity : -zoomIntensity;
-    if (sim.camera.zoom < 0.1) sim.camera.zoom = 0.1;
-    updateUI();
+    e.preventDefault();
+    sim.camera.zoom += e.deltaY < 0 ? 0.05 : -0.05;
+    if (sim.camera.zoom < 0.05) sim.camera.zoom = 0.05;
 }, { passive: false });
 
 canvas.addEventListener('mousedown', e => {
-    if (e.button === 2) { // Right Click (Pan)
+    if (e.button === 2) {
         sim.input.panning = true;
         sim.input.panStart = { x: e.clientX, y: e.clientY };
-    } else { // Left Click (Launch)
-        let wx = s2w_x(e.clientX);
-        let wy = s2w_y(e.clientY);
-        sim.input.dragStart = { x: wx, y: wy };
-        sim.input.current = { x: wx, y: wy };
-        calculateTrajectory(); // Calc once on click
+    } else {
+        sim.input.dragStart = { x: s2w_x(e.clientX), y: s2w_y(e.clientY) };
+        sim.input.current = sim.input.dragStart;
+        calculateTrajectory();
     }
 });
 
 canvas.addEventListener('mousemove', e => {
-    // Panning Logic
     if (sim.input.panning) {
         let dx = (e.clientX - sim.input.panStart.x) / sim.camera.zoom;
         let dy = (e.clientY - sim.input.panStart.y) / sim.camera.zoom;
-        sim.camera.x -= dx;
-        sim.camera.y -= dy;
+        sim.camera.x -= dx; sim.camera.y -= dy;
         sim.input.panStart = { x: e.clientX, y: e.clientY };
         return;
     }
-
-    // Launching Logic
     if (sim.input.dragStart) {
-        let wx = s2w_x(e.clientX);
-        let wy = s2w_y(e.clientY);
-        sim.input.current = { x: wx, y: wy };
-        
-        // OPTIMIZATION: Recalculate trajectory ONLY when mouse moves
+        sim.input.current = { x: s2w_x(e.clientX), y: s2w_y(e.clientY) };
         calculateTrajectory();
     }
 });
 
 canvas.addEventListener('mouseup', e => {
     if (sim.input.panning) { sim.input.panning = false; return; }
-    
     if (sim.input.dragStart) {
-        // Launch!
         let vx = (sim.input.dragStart.x - sim.input.current.x) * 0.02;
         let vy = (sim.input.dragStart.y - sim.input.current.y) * 0.02;
         
         sim.bodies.push(new Body(
             sim.input.dragStart.x, sim.input.dragStart.y, 
-            20, vx, vy, '#00f2ff', 'planet'
+            sim.builder.mass, vx, vy, 
+            sim.builder.color, sim.builder.type, sim.builder.locked
         ));
         
         sim.input.dragStart = null;
-        sim.cache.trajectory = []; // Clear cache
+        sim.cache.trajectory = [];
         resetUI();
-        updateUI();
     }
 });
-// Disable context menu for right-click pan
-canvas.addEventListener('contextmenu', e => e.preventDefault());
 
-// --- TRAJECTORY PREDICTOR (THE MATH CORE) ---
 function calculateTrajectory() {
     if (!sim.input.dragStart) return;
-    
     let points = [];
+    // Create Ghost Particle
     let ghost = { 
-        x: sim.input.dragStart.x, 
-        y: sim.input.dragStart.y, 
+        x: sim.input.dragStart.x, y: sim.input.dragStart.y, 
         vx: (sim.input.dragStart.x - sim.input.current.x) * 0.02, 
         vy: (sim.input.dragStart.y - sim.input.current.y) * 0.02 
     };
 
-    // Calculate Velocity & Escape Velocity
     let v_curr = Math.sqrt(ghost.vx*ghost.vx + ghost.vy*ghost.vy);
-    let sun = sim.bodies.find(b => b.type === 'star');
+    let sun = sim.bodies.find(b => b.type.includes('star') || b.type === 'black_hole');
     let v_esc = 0;
-    let isStable = false;
-
+    
     if (sun) {
-        let dx = sun.x - ghost.x;
-        let dy = sun.y - ghost.y;
-        let dist = Math.sqrt(dx*dx + dy*dy);
-        v_esc = Math.sqrt(2 * sim.params.G * sun.mass / dist); // Physics Formula
-        isStable = v_curr < v_esc;
+        let dist = Math.hypot(sun.x - ghost.x, sun.y - ghost.y);
+        v_esc = Math.sqrt(2 * sim.params.G * sun.mass / dist);
     }
 
-    // Simulate 200 steps
-    for(let i=0; i<200; i++) {
+    updateTelemetry(v_curr, v_esc);
+
+    for(let i=0; i<150; i++) { // 150 steps prediction
         let fx = 0, fy = 0;
         for(let b of sim.bodies) {
-            if(b.type !== 'star') continue; // Only gravity from stars matters for prediction
+            if(!b.locked) continue; // Only static gravity wells affect prediction (Optimization)
             let dx = b.x - ghost.x;
             let dy = b.y - ghost.y;
             let dSq = dx*dx + dy*dy;
             let d = Math.sqrt(dSq);
-            if(d < 20) break; // Crash
+            if(d < 20) break;
             let f = (sim.params.G * b.mass) / dSq;
             fx += f * (dx/d);
             fy += f * (dy/d);
@@ -331,118 +358,80 @@ function calculateTrajectory() {
         ghost.x += ghost.vx; ghost.y += ghost.vy;
         points.push({x: ghost.x, y: ghost.y});
     }
-    
     sim.cache.trajectory = points;
-    updateTelemetry(v_curr, v_esc, isStable);
 }
 
-// --- UI UPDATES ---
-function updateUI() {
-    document.getElementById('count').innerText = sim.bodies.length;
-    document.getElementById('zoom-display').innerText = sim.camera.zoom.toFixed(2) + "x";
-    document.getElementById('t-val').innerText = sim.params.timeScale.toFixed(1) + "x";
-}
-
-function updateTelemetry(v, esc, stable) {
-    document.getElementById('v-launch').innerText = v.toFixed(3) + " km/s";
-    document.getElementById('v-esc').innerText = esc.toFixed(3) + " km/s";
+function updateTelemetry(v, esc) {
+    document.getElementById('v-launch').innerText = v.toFixed(2) + " km/s";
+    document.getElementById('v-esc').innerText = esc.toFixed(2) + " km/s";
+    const stat = document.getElementById('orbit-status');
     
-    const statBox = document.getElementById('orbit-status');
-    if(stable) {
-        statBox.innerText = "ORBIT: STABLE (CAPTURE)";
-        statBox.className = "status-stable";
+    if (v < esc) {
+        stat.innerText = "ORBIT: STABLE"; stat.className = "status-stable";
     } else {
-        statBox.innerText = "ORBIT: ESCAPE TRAJECTORY";
-        statBox.className = "status-escape";
+        stat.innerText = "ORBIT: ESCAPE"; stat.className = "status-escape";
     }
 }
 
 function resetUI() {
-    const statBox = document.getElementById('orbit-status');
-    statBox.innerText = "AWAITING INPUT";
-    statBox.className = "";
-    document.getElementById('v-launch').innerText = "--";
-    document.getElementById('v-esc').innerText = "--";
+    document.getElementById('orbit-status').innerText = "SYSTEM IDLE";
+    document.getElementById('orbit-status').className = "";
 }
 
 // --- SCENES ---
 sim.loadSolar = () => {
     sim.bodies = [];
-    let cx = 0, cy = 0;
-    
-    // 1. Sun (Massive, Static)
-    sim.bodies.push(new Body(cx, cy, 40000, 0, 0, '#ffaa00', 'star'));
-    
-    // 2. Earth (Stable Circular Orbit)
-    // v = sqrt(G * M / r)
+    sim.bodies.push(new Body(0, 0, 40000, 0, 0, '#ffaa00', 'star_yellow', true));
     let r = 600;
     let v = Math.sqrt((sim.params.G * 40000) / r);
-    sim.bodies.push(new Body(cx + r, cy, 100, 0, v, '#00f2ff', 'planet'));
-    
-    sim.camera.x = 0; sim.camera.y = 0; sim.camera.zoom = 0.5;
-    updateUI();
+    sim.bodies.push(new Body(r, 0, 100, 0, v, '#00f2ff', 'planet', false));
+    sim.camera = {x:0, y:0, zoom:0.5};
 };
 
 sim.loadBinary = () => {
     sim.bodies = [];
     let m = 15000, r = 400;
-    let v = Math.sqrt((sim.params.G * m) / (4*r)); // Binary Stability Formula
-
-    sim.bodies.push(new Body(-r, 0, m, 0, v, '#ff2e63', 'star'));
-    sim.bodies.push(new Body(r, 0, m, 0, -v, '#00f2ff', 'star'));
-    
-    sim.camera.x = 0; sim.camera.y = 0; sim.camera.zoom = 0.4;
-    updateUI();
+    let v = Math.sqrt((sim.params.G * m) / (4*r));
+    sim.bodies.push(new Body(-r, 0, m, 0, v, '#ff2e63', 'star_neutron', false)); // Unlocked Binary
+    sim.bodies.push(new Body(r, 0, m, 0, -v, '#00f2ff', 'star_neutron', false));
+    sim.camera = {x:0, y:0, zoom:0.4};
 };
 
-sim.reset = () => { sim.bodies = []; updateUI(); };
+sim.reset = () => { sim.bodies = []; };
 
-// --- MAIN LOOP ---
+// --- LOOP ---
 function loop() {
-    // 1. Clear
-    ctx.fillStyle = '#0b0c10';
+    ctx.fillStyle = '#050508';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 2. Draw Grid (Optional: Helps perception of movement)
-    // (Skipped for minimalism, but stars would go here)
-
-    // 3. Physics & Draw
     for (let i = sim.bodies.length - 1; i >= 0; i--) {
         let b = sim.bodies[i];
         if (b.dead) { sim.bodies.splice(i, 1); continue; }
-        b.update(sim.params.timeScale);
+        b.update(1.0);
         b.draw();
     }
+    
+    document.getElementById('count').innerText = sim.bodies.length;
 
-    // 4. Draw Prediction Line (From Cache)
     if (sim.input.dragStart && sim.cache.trajectory.length > 0) {
         ctx.beginPath();
         let start = sim.cache.trajectory[0];
         ctx.moveTo(w2s_x(start.x), w2s_y(start.y));
-        for(let p of sim.cache.trajectory) {
-            ctx.lineTo(w2s_x(p.x), w2s_y(p.y));
-        }
-        ctx.strokeStyle = '#ffffff';
-        ctx.setLineDash([5, 5]);
-        ctx.stroke();
-        ctx.setLineDash([]);
+        for(let p of sim.cache.trajectory) ctx.lineTo(w2s_x(p.x), w2s_y(p.y));
+        ctx.strokeStyle = '#fff'; ctx.setLineDash([5,5]); ctx.stroke(); ctx.setLineDash([]);
         
-        // Draw Drag Line
         ctx.beginPath();
         ctx.moveTo(w2s_x(sim.input.dragStart.x), w2s_y(sim.input.dragStart.y));
         ctx.lineTo(w2s_x(sim.input.current.x), w2s_y(sim.input.current.y));
-        ctx.strokeStyle = '#00f2ff';
-        ctx.stroke();
+        ctx.strokeStyle = sim.builder.color; ctx.stroke();
     }
-
     requestAnimationFrame(loop);
 }
 
-// Init
-window.dispatchEvent(new Event('resize')); // Force size calc
+window.dispatchEvent(new Event('resize'));
+updateBuilder();
 sim.loadSolar();
 loop();
-
 </script>
 </body>
 </html>
@@ -454,3 +443,4 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
+
