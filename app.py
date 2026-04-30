@@ -2,13 +2,13 @@ from flask import Flask, render_template_string
 
 app = Flask(__name__)
 
-# --- TITAN VIII: EVENT HORIZON EDITION ---
+# --- TITAN VIII: FINAL + VELOCITY ---
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Titan VIII | Event Horizon</title>
+    <title>Titan VIII | Velocity Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* --- UI THEME --- */
@@ -268,6 +268,16 @@ class Body {
         
         ctx.fill();
         ctx.shadowBlur = 0;
+
+        // --- VELOCITY LABEL (NEW) ---
+        // Only show if moving faster than a crawl
+        let speed = Math.sqrt(this.vx*this.vx + this.vy*this.vy);
+        if (speed > 0.1) {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+            ctx.font = "10px JetBrains Mono";
+            // Offset text to right of object
+            ctx.fillText(speed.toFixed(1) + " km/s", sx + sr + 5, sy + 4);
+        }
     }
 }
 
@@ -458,3 +468,4 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
+
