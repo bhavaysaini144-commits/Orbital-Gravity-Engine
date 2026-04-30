@@ -3,7 +3,7 @@
 > A high-performance gravity simulator solving the N-Body Problem in real-time.
 
 ## 🚀 Live Demo
-**[Click here to launch simulation]** (Put your link here later)
+**https://orbital-gravity-engine.onrender.com** 
 
 ## 💡 The Science
 This engine simulates **Newtonian Gravity**. Every object attracts every other object using the formula:
