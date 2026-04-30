@@ -2,116 +2,164 @@ from flask import Flask, render_template_string
 
 app = Flask(__name__)
 
-# --- ORBITAL ENGINE: FINAL VERSION ---
+# --- FINAL PROJECT: CELESTIAL ARCHITECT v3 ---
 HTML_PAGE = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Orbital | Gravity Sim</title>
+    <title>Celestial Architect | Pro Physics</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; background: #050505; overflow: hidden; color: #aaddff; font-family: 'Rajdhani', sans-serif; user-select: none; }
         canvas { display: block; }
         
-        /* UI OVERLAY */
-        .hud { position: absolute; top: 0; left: 0; width: 100%; padding: 20px; box-sizing: border-box; display: flex; justify-content: space-between; pointer-events: none; }
-        .panel { background: rgba(10, 15, 30, 0.8); border: 1px solid #1e3a5f; padding: 15px; border-radius: 8px; backdrop-filter: blur(4px); pointer-events: auto; min-width: 220px; }
+        /* HUD LAYOUT */
+        .hud { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; padding: 20px; box-sizing: border-box; display: flex; justify-content: space-between; }
         
-        h1 { margin: 0 0 10px 0; font-size: 22px; letter-spacing: 2px; text-transform: uppercase; color: #fff; text-shadow: 0 0 10px #00d2ff; border-bottom: 1px solid #1e3a5f; padding-bottom: 5px; }
-        .stat-row { display: flex; justify-content: space-between; margin: 5px 0; font-size: 14px; color: #88ccff; }
-        .stat-val { font-weight: bold; color: #fff; }
+        /* PANELS */
+        .panel { 
+            background: rgba(12, 18, 30, 0.9); 
+            border: 1px solid #1e3a5f; 
+            padding: 15px; 
+            border-radius: 8px; 
+            backdrop-filter: blur(8px); 
+            pointer-events: auto; 
+            width: 260px; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        
+        /* HEADERS & TEXT */
+        h2 { margin: 0 0 15px 0; font-size: 18px; letter-spacing: 2px; text-transform: uppercase; color: #00d2ff; border-bottom: 1px solid #1e3a5f; padding-bottom: 5px; }
+        .label { font-size: 12px; color: #6699cc; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; }
+        .value { color: white; font-weight: bold; }
 
         /* CONTROLS */
-        .slider-box { margin-top: 15px; border-top: 1px solid #1e3a5f; padding-top: 10px; }
-        label { display: block; font-size: 11px; color: #6699cc; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
-        input[type=range] { width: 100%; cursor: pointer; accent-color: #00d2ff; margin-bottom: 10px; }
+        select, button { 
+            width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid #335577; color: #aaddff; 
+            padding: 8px; margin-top: 5px; font-family: inherit; cursor: pointer; outline: none; 
+        }
+        select:hover, button:hover { border-color: #00d2ff; color: white; }
         
-        button { width: 100%; background: rgba(0, 210, 255, 0.1); border: 1px solid #00d2ff; color: #00d2ff; padding: 10px; margin-top: 8px; font-family: inherit; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
-        button:hover { background: #00d2ff; color: #000; box-shadow: 0 0 15px #00d2ff; }
-        button.danger { border-color: #ff4444; color: #ff4444; background: rgba(255, 68, 68, 0.1); }
-        button.danger:hover { background: #ff4444; color: white; box-shadow: 0 0 15px #ff4444; }
+        input[type=range] { width: 100%; margin: 8px 0; accent-color: #00d2ff; cursor: pointer; }
+        
+        .toggle-row { display: flex; align-items: center; margin-top: 15px; cursor: pointer; }
+        .checkbox { width: 16px; height: 16px; border: 1px solid #00d2ff; margin-right: 10px; display: inline-block; background: rgba(0,0,0,0.5); }
+        .checked { background: #00d2ff; box-shadow: 0 0 10px #00d2ff; }
 
-        .tutorial { position: absolute; bottom: 30px; width: 100%; text-align: center; color: rgba(255,255,255,0.3); font-size: 14px; pointer-events: none; letter-spacing: 2px; text-transform: uppercase; }
+        /* NOTIFICATIONS */
+        #alert-box { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); color: #ff4444; font-weight: bold; opacity: 0; transition: 0.5s; text-shadow: 0 0 10px red; }
     </style>
 </head>
 <body>
 
+<div id="alert-box">⚠ BLACK HOLE DETECTED ⚠</div>
+
 <div class="hud">
-    <!-- DATA PANEL -->
+    <!-- LEFT: CREATION LAB -->
     <div class="panel">
-        <h1>Physics Data</h1>
-        <div class="stat-row"><span>Objects:</span> <span class="stat-val" id="obj-count">0</span></div>
-        <div class="stat-row"><span>Gravity (G):</span> <span class="stat-val" id="g-val">0.50</span></div>
-        <div class="stat-row"><span>Time Scale:</span> <span class="stat-val" id="time-val">1.0x</span></div>
+        <h2>Celestial Forge</h2>
         
-        <div class="slider-box">
-            <label>Gravitational Constant</label>
-            <input type="range" min="0.1" max="2.0" step="0.1" value="0.5" oninput="updatePhysics(this.value, 'g')">
-            <label>Time Dilation</label>
-            <input type="range" min="0.0" max="3.0" step="0.1" value="1.0" oninput="updatePhysics(this.value, 't')">
+        <div class="label">Class Type</div>
+        <select id="type-select" onchange="updatePreset()">
+            <option value="planet">Standard Planet</option>
+            <option value="star_yellow">Star (Yellow Dwarf)</option>
+            <option value="star_red">Star (Red Giant)</option>
+            <option value="neutron">Neutron Star</option>
+            <option value="black_hole">>> BLACK HOLE <<</option>
+        </select>
+
+        <div class="label"><span>Mass</span> <span id="mass-val" class="value">50</span></div>
+        <input type="range" id="mass-slider" min="10" max="10000" value="50" oninput="manualOverride()">
+
+        <div class="label"><span>Density</span> <span id="dens-val" class="value">1.0</span></div>
+        <input type="range" id="dens-slider" min="0.1" max="5.0" step="0.1" value="1.0" oninput="manualOverride()">
+        
+        <div class="toggle-row" onclick="toggleLock()">
+            <div class="checkbox" id="lock-box"></div>
+            <span>Lock Position (God Mode)</span>
         </div>
+
+        <div class="label" style="margin-top: 20px; color: #888;">PREDICTION ENGINE: ACTIVE</div>
     </div>
 
-    <!-- CONTROL PANEL -->
+    <!-- RIGHT: TELEMETRY -->
     <div class="panel">
-        <h1>Simulation</h1>
-        <button onclick="spawnSystem('solar')">PRESET: Solar System</button>
-        <button onclick="spawnSystem('binary')">PRESET: Binary Stars</button>
-        <button onclick="spawnSystem('void')">PRESET: The Void</button>
-        <button class="danger" onclick="reset()">Clear All</button>
+        <h2>Mission Data</h2>
+        <div class="label"><span>Object Count</span> <span id="count" class="value">0</span></div>
+        <div class="label"><span>Zoom Level</span> <span id="zoom" class="value">1.0x</span></div>
+        <div class="label"><span>Sim Speed</span> <span id="speed" class="value">1.0x</span></div>
+        
+        <button onclick="spawnSystem('solar')" style="margin-top: 20px; border-color: #00d2ff;">Load: Solar System</button>
+        <button onclick="spawnSystem('binary')">Load: Binary Stars</button>
+        <button onclick="spawnSystem('void')" style="border-color: #ff4444; color: #ff4444;">Clear Sector</button>
     </div>
 </div>
 
-<div class="tutorial">Click & Drag to Launch • Scroll to Zoom</div>
 <canvas id="sim"></canvas>
 
 <script>
     const canvas = document.getElementById('sim');
     const ctx = canvas.getContext('2d');
     
-    // --- 1. ENGINE VARIABLES ---
-    let G = 0.5;           // Gravity Strength
-    let timeScale = 1.0;   // Time Speed
+    // --- CORE ENGINE ---
     let particles = [];
+    let stars = []; // Background
     let width, height;
-    let stars = [];
+    let G = 0.5;
+    
+    // --- CAMERA ---
+    let camera = { x: 0, y: 0, zoom: 1.0 };
+    
+    // --- BUILDER STATE ---
+    let builder = {
+        type: 'planet',
+        mass: 50,
+        density: 1.0,
+        locked: false,
+        color: '#00ccff'
+    };
 
-    // --- 2. SETUP & RESIZE ---
+    // --- SETUP ---
     function resize() {
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
-        createStars();
+        generateBackground();
     }
     window.addEventListener('resize', resize);
 
-    function createStars() {
+    function generateBackground() {
         stars = [];
-        for(let i=0; i<150; i++) {
+        for(let i=0; i<600; i++) {
             stars.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                size: Math.random() * 1.5,
-                alpha: Math.random()
+                x: (Math.random()-0.5) * width * 4,
+                y: (Math.random()-0.5) * height * 4,
+                r: Math.random() * 1.5,
+                a: Math.random()
             });
         }
     }
 
-    // --- 3. THE PHYSICS OBJECT ---
-    class Particle {
-        constructor(x, y, mass, vx, vy, color, isStatic=false) {
+    // --- PHYSICS ENTITY ---
+    class Body {
+        constructor(x, y, mass, vx, vy, color, type, locked) {
             this.x = x;
             this.y = y;
             this.mass = mass;
             this.vx = vx;
             this.vy = vy;
-            this.radius = Math.max(2, Math.sqrt(this.mass)); 
             this.color = color;
+            this.type = type; // 'planet', 'star', 'black_hole'
+            this.locked = locked;
             this.trail = [];
-            this.isStatic = isStatic;
+            
+            // Radius derived from Mass & Density (Volume formula approx)
+            // Density = Mass / Volume -> Volume = Mass / Density -> R ~ cbrt(Vol)
+            // We use sqrt for 2D visual simplicity
+            this.radius = Math.sqrt(this.mass / builder.density);
+            if(this.type === 'black_hole') this.radius = Math.sqrt(this.mass) * 0.2; // Ultra dense
         }
 
         update() {
-            // N-Body Gravity Calculation
             for (let p of particles) {
                 if (p === this) continue;
                 
@@ -120,31 +168,37 @@ HTML_PAGE = """
                 let distSq = dx*dx + dy*dy;
                 let dist = Math.sqrt(distSq);
                 
-                // Prevent divide by zero / singularity
-                if (dist < (this.radius + p.radius)) continue;
+                // BLACK HOLE LOGIC: Event Horizon
+                if (this.type === 'black_hole' && dist < this.radius + p.radius) {
+                    // EAT THE PLANET
+                    if (p.type !== 'black_hole') {
+                        p.dead = true;
+                        this.mass += p.mass * 0.1; // Absorb mass
+                        continue;
+                    }
+                }
 
-                // NEWTON'S LAW: F = G * m1 * m2 / r^2
+                if (dist < 5) continue; // Singularity Guard
+
                 let force = (G * this.mass * p.mass) / distSq;
-                
-                // Force Vectors
                 let forceX = force * (dx / dist);
                 let forceY = force * (dy / dist);
 
-                // F=ma -> a=F/m -> v+=a
-                if(!this.isStatic) {
-                    this.vx += (forceX / this.mass) * timeScale;
-                    this.vy += (forceY / this.mass) * timeScale;
+                if (!this.locked) {
+                    this.vx += forceX / this.mass;
+                    this.vy += forceY / this.mass;
                 }
             }
 
-            // Apply Velocity to Position
-            this.x += this.vx * timeScale;
-            this.y += this.vy * timeScale;
+            if (!this.locked) {
+                this.x += this.vx;
+                this.y += this.vy;
+            }
 
-            // Store Trail
-            if(particles.length < 80) {
+            // Trail Buffer
+            if(particles.length < 100 && !this.locked) {
                 this.trail.push({x: this.x, y: this.y});
-                if (this.trail.length > 30) this.trail.shift();
+                if(this.trail.length > 40) this.trail.shift();
             }
         }
 
@@ -153,125 +207,225 @@ HTML_PAGE = """
             if (this.trail.length > 1) {
                 ctx.beginPath();
                 ctx.strokeStyle = this.color;
-                ctx.lineWidth = 1;
+                ctx.lineWidth = 1 / camera.zoom;
                 for(let i=0; i<this.trail.length-1; i++) {
-                    ctx.globalAlpha = (i/this.trail.length) * 0.4;
                     ctx.lineTo(this.trail[i].x, this.trail[i].y);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.moveTo(this.trail[i].x, this.trail[i].y);
                 }
+                ctx.stroke();
             }
-            
+
             // Draw Body
-            ctx.globalAlpha = 1.0;
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
             ctx.fillStyle = this.color;
-            // Glow Effect based on Mass
-            ctx.shadowBlur = this.mass > 100 ? 40 : 10;
-            ctx.shadowColor = this.color;
+            
+            // Special Effects
+            if (this.type === 'star' || this.type === 'neutron') {
+                ctx.shadowBlur = 30 * camera.zoom;
+                ctx.shadowColor = this.color;
+            }
+            if (this.type === 'black_hole') {
+                ctx.fillStyle = '#000';
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#a00'; // Accretion disk glow
+            }
+            
             ctx.fill();
-            ctx.shadowBlur = 0; 
+            ctx.shadowBlur = 0;
         }
     }
 
-    // --- 4. MOUSE CONTROLS (SLINGSHOT) ---
+    // --- UI LOGIC ---
+    function updatePreset() {
+        let type = document.getElementById('type-select').value;
+        let mSlider = document.getElementById('mass-slider');
+        let dSlider = document.getElementById('dens-slider');
+        let alert = document.getElementById('alert-box');
+        
+        alert.style.opacity = 0;
+
+        if (type === 'planet') {
+            builder = { type: 'planet', mass: 50, density: 1.0, color: '#00ccff', locked: false };
+        } else if (type === 'star_yellow') {
+            builder = { type: 'star', mass: 2000, density: 0.8, color: '#ffaa00', locked: true };
+        } else if (type === 'star_red') {
+            builder = { type: 'star', mass: 4000, density: 0.3, color: '#ff4400', locked: true };
+        } else if (type === 'neutron') {
+            builder = { type: 'neutron', mass: 1000, density: 3.0, color: '#00ffff', locked: true };
+        } else if (type === 'black_hole') {
+            builder = { type: 'black_hole', mass: 10000, density: 10.0, color: '#000', locked: true };
+            alert.style.opacity = 1;
+        }
+
+        // Update UI Controls to match preset
+        mSlider.value = builder.mass;
+        dSlider.value = builder.density;
+        document.getElementById('mass-val').innerText = builder.mass;
+        document.getElementById('dens-val').innerText = builder.density;
+        updateLockUI();
+    }
+
+    function manualOverride() {
+        builder.mass = parseFloat(document.getElementById('mass-slider').value);
+        builder.density = parseFloat(document.getElementById('dens-slider').value);
+        document.getElementById('mass-val').innerText = builder.mass;
+        document.getElementById('dens-val').innerText = builder.density;
+    }
+
+    function toggleLock() {
+        builder.locked = !builder.locked;
+        updateLockUI();
+    }
+
+    function updateLockUI() {
+        let box = document.getElementById('lock-box');
+        box.className = builder.locked ? 'checkbox checked' : 'checkbox';
+    }
+
+    // --- INPUT & TRAJECTORY PREDICTION ---
     let dragStart = null;
     let dragCurrent = null;
 
-    canvas.addEventListener('mousedown', e => {
-        dragStart = {x: e.clientX, y: e.clientY};
-        dragCurrent = {x: e.clientX, y: e.clientY};
-    });
+    function getWorldPos(e) {
+        return {
+            x: (e.clientX - width/2) / camera.zoom + width/2 - camera.x,
+            y: (e.clientY - height/2) / camera.zoom + height/2 - camera.y
+        };
+    }
 
+    canvas.addEventListener('mousedown', e => {
+        dragStart = getWorldPos(e);
+        dragCurrent = dragStart;
+    });
+    
     canvas.addEventListener('mousemove', e => {
-        if(dragStart) dragCurrent = {x: e.clientX, y: e.clientY};
+        if(dragStart) dragCurrent = getWorldPos(e);
     });
 
     canvas.addEventListener('mouseup', e => {
         if(!dragStart) return;
         
-        // Calculate Velocity Vector
-        let vx = (dragStart.x - e.clientX) * 0.03;
-        let vy = (dragStart.y - e.clientY) * 0.03;
+        // Launch Logic
+        let vx = (dragStart.x - dragCurrent.x) * 0.05;
+        let vy = (dragStart.y - dragCurrent.y) * 0.05;
         
-        // Create New Planet
-        let h = Math.floor(Math.random() * 360);
-        let color = `hsl(${h}, 90%, 60%)`;
-        let mass = Math.random() * 40 + 10;
+        particles.push(new Body(
+            dragStart.x, dragStart.y, 
+            builder.mass, vx, vy, 
+            builder.color, builder.type, builder.locked
+        ));
 
-        particles.push(new Particle(dragStart.x, dragStart.y, mass, vx, vy, color));
-        
         dragStart = null;
-        dragCurrent = null;
-        updateUI();
+        document.getElementById('count').innerText = particles.length;
     });
 
-    // --- 5. SYSTEM LOGIC ---
+    // ZOOM
+    window.addEventListener('wheel', e => {
+        camera.zoom += e.deltaY < 0 ? 0.1 : -0.1;
+        if(camera.zoom < 0.1) camera.zoom = 0.1;
+        if(camera.zoom > 5) camera.zoom = 5;
+        document.getElementById('zoom').innerText = camera.zoom.toFixed(1) + "x";
+    });
+
+    // --- SCENES ---
     function spawnSystem(type) {
         particles = [];
         let cx = width/2, cy = height/2;
-
+        
         if(type === 'solar') {
-            particles.push(new Particle(cx, cy, 4000, 0, 0, '#ffaa00', true)); // Sun
-            particles.push(new Particle(cx+300, cy, 100, 0, 2.5, '#00ccff')); // Earth
-            particles.push(new Particle(cx+480, cy, 80, 0, 2.0, '#ff4400')); // Mars
+            particles.push(new Body(cx, cy, 5000, 0, 0, '#ffaa00', 'star', true));
+            particles.push(new Body(cx+400, cy, 100, 0, 2.5, '#00ccff', 'planet', false));
         }
-        else if(type === 'binary') {
-            particles.push(new Particle(cx-100, cy, 2000, 0, 2.2, '#ff0055'));
-            particles.push(new Particle(cx+100, cy, 2000, 0, -2.2, '#0055ff'));
+        if(type === 'binary') {
+            particles.push(new Body(cx-200, cy, 3000, 0, 2.5, '#ff0055', 'star', false));
+            particles.push(new Body(cx+200, cy, 3000, 0, -2.5, '#0055ff', 'star', false));
         }
-        updateUI();
+        document.getElementById('count').innerText = particles.length;
     }
 
-    function reset() { particles = []; updateUI(); }
-
-    function updatePhysics(val, type) {
-        if(type === 'g') { G = parseFloat(val); document.getElementById('g-val').innerText = G.toFixed(2); }
-        if(type === 't') { timeScale = parseFloat(val); document.getElementById('time-val').innerText = timeScale.toFixed(1) + "x"; }
-    }
-    
-    function updateUI() {
-        document.getElementById('obj-count').innerText = particles.length;
-    }
-
-    // --- 6. MAIN LOOP ---
+    // --- RENDER LOOP ---
     function loop() {
-        // Clear Screen
+        // 1. Draw Background & Camera
         ctx.fillStyle = '#050505';
         ctx.fillRect(0, 0, width, height);
+        
+        ctx.save();
+        ctx.translate(width/2, height/2);
+        ctx.scale(camera.zoom, camera.zoom);
+        ctx.translate(-width/2 + camera.x, -height/2 + camera.y);
 
-        // Draw Stars
         ctx.fillStyle = '#fff';
         for(let s of stars) {
-            ctx.globalAlpha = Math.random() * s.alpha;
-            ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = s.a;
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
         }
 
-        // Draw Particles
-        for(let p of particles) {
+        // 2. Physics Step
+        ctx.globalAlpha = 1.0;
+        for (let i = particles.length - 1; i >= 0; i--) {
+            let p = particles[i];
+            if (p.dead) { particles.splice(i, 1); continue; }
             p.update();
             p.draw();
         }
 
-        // Draw Slingshot Line
-        if(dragStart && dragCurrent) {
+        // 3. PREDICTION LINE (The "Math Flex")
+        if (dragStart && dragCurrent) {
+            // Draw Pull Line
             ctx.beginPath();
             ctx.moveTo(dragStart.x, dragStart.y);
             ctx.lineTo(dragCurrent.x, dragCurrent.y);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.strokeStyle = 'white';
+            ctx.stroke();
+
+            // CALCULATE FUTURE
+            let vx = (dragStart.x - dragCurrent.x) * 0.05;
+            let vy = (dragStart.y - dragCurrent.y) * 0.05;
+            let simX = dragStart.x;
+            let simY = dragStart.y;
+            
+            ctx.beginPath();
+            ctx.moveTo(simX, simY);
+            
+            // Simulate 100 ticks ahead
+            for(let i=0; i<100; i++) {
+                // Add forces from existing planets to our ghost particle
+                for(let p of particles) {
+                    let dx = p.x - simX;
+                    let dy = p.y - simY;
+                    let distSq = dx*dx + dy*dy;
+                    let dist = Math.sqrt(distSq);
+                    if(dist < 50) break; // Collision prediction
+                    
+                    let force = (G * p.mass) / distSq; // Simplified F = ma (mass cancels out for acceleration)
+                    let ax = force * (dx / dist);
+                    let ay = force * (dy / dist);
+                    
+                    vx += ax;
+                    vy += ay;
+                }
+                simX += vx;
+                simY += vy;
+                ctx.lineTo(simX, simY);
+            }
+            
+            ctx.strokeStyle = 'rgba(0, 210, 255, 0.5)';
             ctx.setLineDash([5, 5]);
             ctx.stroke();
             ctx.setLineDash([]);
         }
 
+        ctx.restore();
         requestAnimationFrame(loop);
     }
 
     // Start
     resize();
     spawnSystem('solar');
+    updatePreset(); // Init UI
     loop();
 
 </script>
